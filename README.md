@@ -1,7 +1,7 @@
 # Chess Tournament Manager (Java Console App)
 
 A Java-based console application to simulate and manage chess tournaments.  
-Currently supports Round-Robin pairings with player tracking, match results, and live standings.
+Currently supports Round-Robin pairings with player tracking, match results, and live standings(after the completion of each round).
 
 
 
