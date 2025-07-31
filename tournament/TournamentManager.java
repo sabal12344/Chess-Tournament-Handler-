@@ -25,6 +25,7 @@ class Tournament{
 
     Tournament(int players){
         this.players = players;
+        this.bye_player = players;
         if(players%2==0)
         this.total_rounds=players-1;
         else
@@ -74,71 +75,81 @@ class Tournament{
 
      }
 
-    void matchmaker(){
-      int matches[][] = new int [this.players/2][2];
-      if(this.players%2==1){
-        bye_player = (current_round%players)+1;
-      }
+    void matchmaker() {
+    int[][] matches = new int[this.players / 2][2];
+    boolean[] ispaired = new boolean[this.players + 1]; 
+    int a = 0;
 
-      
-  
-       int a=0;
-       for(int i=1;i<this.players;i++){
-        boolean i_matched = false;
-        for(int m=0;m<a;m++){
-            if(matches[m][0]==i||matches[m][1]==i){
-                i_matched = true;
-                break;
+    
 
-            }
-        }
-        if(i_matched||i==bye_player)
-        continue;
-
+    for (int i = 1; i <= this.players; i++) {
         
-        for(int j=i+1;j<=this.players;j++){
-            boolean j_matched=false ;
-            for(int m = 0; m < a; m++){
-                if(matches[m][0]==j||matches[m][1]==j){
-                    j_matched = true;
-                    break;
-                }
-            }
-            if(j_matched||j==bye_player){
+        if (ispaired[i] || i == bye_player){
+            continue;
+        }
+        
+
+        for (int j = i + 1; j <= this.players; j++) {
+            if (ispaired[j] || j == bye_player){
                 continue;
             }
-            if(!alreadyPlayed(i,j)){
+            int final1=i,final2=j;
+            matches[a][0] = final1;
+                matches[a][1] = final2;
+                ispaired[final1] = true;
+                ispaired[final2] = true;
                 
+                
+
             
-           
-           
-               
-                matches[a][0]=i;
-                matches[a][1]=j;
-                System.out.println(matches[a][0]+" vs "+ matches[a][1]);
+                
+                
                 a++;
-              
+                break;
 
                 
-                  
-                recordKeeper(i, j);
-              
-                break;
-               
-            
-        }
-        }
-       }
-       
-       promptResults(matches);
+        
 
+        }
+    }
+    for(int i=0;i<players/2;i++){
+        if(alreadyPlayed(matches[i][0], matches[i][1])){
+            int w=i;
+            while(w<players/2){
+                if (!alreadyPlayed(matches[i][0],matches[w][1])) {
+                    int temp=matches[i][1];
+                    matches[i][1] = matches[w][1];
+                    matches[w][1] = temp;
+                    
+                    break;
+                    
+                }
+                w++;
+            }
+        }
+    }
+    System.out.println("\nThe scheduled matches for round " + (current_round + 1));
+    for(int i =0;i<players/2;i++){
+        System.out.println(p[matches[i][0]-1].name + " vs " + p[matches[i][1]-1].name);
+        recordKeeper(matches[i][0], matches[i][1]);
 
     }
+
+    
+
+
+    if (players % 2 == 1) {
+        System.out.println(p[bye_player - 1].name + " is getting a bye.");
+    }
+
+    promptResults(matches);
+}
+
     
      void promptResults(int [][]matches){
         
         System.out.println("\nThis is where you enter results. Here are the instructions :\n\nPlayer1 wins : you press 1\nPlayer2 wins : you press 2\nDraw : any other keys");
-        System.out.println("In round "+current_round+" :\n");
+        System.out.println("\nIn round "+(current_round+1)+" :\n");
         for(int i=0;i<players/2;i++){
             System.out.print("\n\nMatch number "+(i+1)+"\n\t"+p[matches[i][0]-1].name+" (player1) vs "+this.p[matches[i][1]-1].name+" (player2) : ");
             int result = sc.nextInt();
@@ -158,10 +169,14 @@ class Tournament{
             
 
         }
-        if(bye_player!=-1){
+        if(players%2==1){
         System.out.println("\n"+p[bye_player-1].name+" got a bye and secured a free point.");
-        this.p[bye_player-1].points++;}
+        this.p[bye_player-1].points++;
+        bye_player--;
+    }
+
         this.current_round++;
+        
         standings();
         
         
@@ -202,6 +217,7 @@ public class TournamentManager {
         for(int i = 1; i<= t1.total_rounds;i++){
             t1.matchmaker();
         }
+        System.out.println("\n\nTournament successfully ended, Our winner is "+t1.p2[0].name+"!!!!! congrats.");
 
 
     }
