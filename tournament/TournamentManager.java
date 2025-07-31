@@ -116,7 +116,7 @@ class Tournament{
         if(alreadyPlayed(matches[i][0], matches[i][1])){
             int w=i;
             while(w<players/2){
-                if (!alreadyPlayed(matches[i][0],matches[w][1])) {
+                if (!alreadyPlayed(matches[i][0],matches[w][1])&&(!alreadyPlayed(matches[w][0],matches[i][1]))) {
                     int temp=matches[i][1];
                     matches[i][1] = matches[w][1];
                     matches[w][1] = temp;
