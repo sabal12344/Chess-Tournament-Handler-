@@ -14,187 +14,159 @@ class Player{
 }
 class Tournament{
     Scanner sc = new Scanner(System.in);
-    int bye_player;
-    int current_round;
+    int bye_player=-1;
+    
     int total_rounds;
     int players;//number of players 
     Player [] p ;
     Player [] p2 ;
-    int [][] record ;
+   
+    int [][][] schedule;
 
 
     Tournament(int players){
         this.players = players;
-        if(players%2==0) this.bye_player=players+1;
-        else this.bye_player = players;
-        if(players%2==0)
-        this.total_rounds=players-1;
-        else
-        this.total_rounds =players;
+        if(players%2==1) {
+            this.players++;
+            bye_player = this.players;
+        }
+        total_rounds = this.players -1;
 
-        this.p = new Player[players];
+        this.p = new Player[players+1];
 
-    this.p2 = new Player[players];
-    
-   
-    this.record = new int [players][this.total_rounds];
+    this.p2 = new Player[players+1];
+
+    this.schedule = new int [total_rounds+1][this.players/2+1][3];//1-based indexing
+
     }
     
     
     
      void setPlayers(){
         System.out.println("\nEnter the name of tournament participants :\n");
-        for(int i=0;i<this.players;i++){
-            System.out.print("Player no. "+(i+1)+" : ");
+        int n = players;
+        if(bye_player!=-1)
+        n= players-1;
+
+        for(int i=1;i<=n;i++){
+            System.out.print("Player no. "+(i)+" : ");
             String name = sc.nextLine();
             //int id = 1;
-            this.p[i]= new Player(name,i+1);
+            this.p[i]= new Player(name,i);
             this.p2[i]= this.p[i];
             
         }
 
      }
+     int rotatorDecre(int i){
+        if(i==2){
+            return players;
+        }
+        return i-1;
+     }
+     int rotatorIncre(int i){
+        if(i==players)
+        {
+            return 2;
+        }
+        return i+1;
+     }
+     void scheduler(){
+       
+        int n=players;
+        
+       for(int i=1;i<=total_rounds;i++){
+        
+        int circleplus =n;
+        int circleminus =n;
+      
+        schedule[i][1][1]=1;
+        schedule[i][1][2]= n;
+        
+       
 
-     void recordKeeper(int id1, int id2){
-               
-              this.record[id1-1][this.current_round] = id2;
-              this.record[id2 -1 ] [this.current_round] = id1;      
+   
+
+
+        for(int j=2;j<=players/2;j++){
+            circleplus =rotatorIncre(circleplus);
+            schedule[i][j][1] = circleplus;
+            circleminus = rotatorDecre(circleminus);
+            schedule[i][j][2] = circleminus;
+             
+        }
+        n--;
+       }
+    
 
 
      }
 
-     boolean alreadyPlayed(int id1, int id2){
-
-    for (int i = 0; i < this.current_round; i++) {
-        if (record[id1 - 1][i] == id2 || record[id2 - 1][i] == id1) {
-            return true;
-        }
-    }
-    return false;
-        
-
-
-     }
-
-    void matchmaker() {
-    int[][] matches = new int[this.players / 2][2];
-    boolean[] ispaired = new boolean[this.players + 1]; 
-    int a = 0;
-
+     
     
 
-    for (int i = 1; i <= this.players; i++) {
-        
-        if (ispaired[i] || i == bye_player){
-            continue;
-        }
-        
-
-        for (int j = i + 1; j <= this.players; j++) {
-            if (ispaired[j] || j == bye_player){
-                continue;
-            }
-            int final1=i,final2=j;
-            matches[a][0] = final1;
-                matches[a][1] = final2;
-                ispaired[final1] = true;
-                ispaired[final2] = true;
-                
-                
-
-            
-                
-                
-                a++;
-                break;
-
-                
-        
-
-        }
-    }
-    for(int i=0;i<players/2-1;i++){
-        if(alreadyPlayed(matches[i][0], matches[i][1])){
-            int w=i+1;
-            while(w<players/2){
-                if (!alreadyPlayed(matches[i][0],matches[w][1])&&(!alreadyPlayed(matches[w][0],matches[i][1]))) {
-                    int temp=matches[i][1];
-                    matches[i][1] = matches[w][1];
-                    matches[w][1] = temp;
-                    
-                    break;
-                    
-                }
-                else if(!alreadyPlayed(matches[i][0],matches[w][0])&&(!alreadyPlayed(matches[w][1],matches[i][1]))) {
-                    int temp=matches[i][1];
-                    matches[i][1] = matches[w][0];
-                    matches[w][0] = temp;
-                    
-                    break;
-                    
-                }
-                w++;
-            }
-        }
-    } 
-    System.out.println("\nThe scheduled matches for round " + (current_round + 1));
-    for(int i =0;i<players/2;i++){
-        System.out.println(p[matches[i][0]-1].name + " vs " + p[matches[i][1]-1].name);
-        recordKeeper(matches[i][0], matches[i][1]);
-
-    }
-
     
-
-
-    if (players % 2 == 1) {
-        System.out.println(p[bye_player - 1].name + " is getting a bye.");
-    }
-
-    promptResults(matches);
-}
-
-    
-     void promptResults(int [][]matches){
+     void promptResults(){
+        
         
         System.out.println("\nThis is where you enter results. Here are the instructions :\n\nPlayer1 wins : you press 1\nPlayer2 wins : you press 2\nDraw : any other keys");
-        System.out.println("\nIn round "+(current_round+1)+" :\n");
-        for(int i=0;i<players/2;i++){
-            System.out.print("\n\nMatch number "+(i+1)+"\n\t"+p[matches[i][0]-1].name+" (player1) vs "+this.p[matches[i][1]-1].name+" (player2) : ");
+        String bye_message = null;
+        for(int i=1;i<=total_rounds;i++){
+            System.out.println("\nIn round "+(i)+" :\n");
+
+            for(int j=1;j<=players/2;j++){
+
+
+                if((schedule[i][j][1]==bye_player)||(schedule[i][j][2]==bye_player)){
+
+                    
+                    int bye_id = schedule[i][j][1]==bye_player  ?  schedule[i][j][2] : schedule[i][j][1];
+                p[bye_id].points++;
+                bye_message = "\n\nThe player named "+p[bye_id].name +" is on bye and received a free point this round.";
+
+                    continue;
+
+                }
+                
+
+            System.out.print("Match number "+j+"\n\t"+p[schedule[i][j][1]].name+" (player 1)   vs   "+p[schedule[i][j][2]].name+"(player 2) :\n\t- ");
+
             int result = sc.nextInt();
 
             if(result == 1){
-               this.p[matches[i][0]-1].points++;
+               this.p[schedule[i][j][1]].points++;
             }
             else if(result == 2){
-                this.p[matches[i][1]-1].points++;
+                this.p[schedule[i][j][2]].points++;
 
             }
             else{
-                this.p[matches[i][0]-1].points += 0.5;
-                this.p[matches[i][1]-1].points += 0.5;
+                this.p[schedule[i][j][1]].points += 0.5;
+                this.p[schedule[i][j][2]].points += 0.5;
 
             } 
+
+        
+
+            }
+            if(bye_message != null){
+                System.out.println(bye_message);
+            }
+            standings(i);          
+
+            
             
 
         }
-        if(players%2==1){
-        System.out.println("\n"+p[bye_player-1].name+" got a bye and secured a free point.");
-        this.p[bye_player-1].points++;
-        bye_player--;
-    }
-
-        this.current_round++;
-        
-        standings();
-        
+     
+       
         
         
      }
 
-    void standings(){
-        System.out.println("\n\nThe current standings after round "+this.current_round+"\n");
-       for(int i =0;i<p2.length-1;i++){
+    void standings(int round){
+        System.out.println("\n\nThe current standings after round "+round+"\n");
+       for(int i =1;i<p2.length-1;i++){
         for(int j=i+1;j<p2.length;j++){
             if(this.p2[i].points < this.p2[j].points){
                 Player temp = this.p2[i];
@@ -206,8 +178,8 @@ class Tournament{
         }
        }
 
-       for(int i =0;i<p2.length;i++){
-         System.out.println((i+1)+". "+this.p2[i].name+"\t"+this.p2[i].points+" pts");
+       for(int i =1;i<p2.length;i++){
+         System.out.println((i)+". "+this.p2[i].name+"\t"+this.p2[i].points+" pts");
        }
        
     }
@@ -223,10 +195,11 @@ public class TournamentManager {
         int players = sc.nextInt();
         Tournament t1 = new Tournament(players);
         t1.setPlayers();
-        for(int i = 1; i<= t1.total_rounds;i++){
-            t1.matchmaker();
-        }
-        System.out.println("\n\nTournament successfully ended, Our winner is "+t1.p2[0].name+"!!!!! congrats.");
+        t1.scheduler();
+       
+            t1.promptResults();
+        
+        System.out.println("\n\nTournament successfully ended, Our winner is "+t1.p2[1].name+"!!!!! congrats.");
 
 
     }
