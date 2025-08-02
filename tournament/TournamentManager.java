@@ -2,7 +2,7 @@ import java.util.Scanner;
 class Player{
     double points;
     String name;
-   
+
     int id;
 
     Player(String name,int id){
@@ -209,3 +209,4 @@ public class TournamentManager {
 
     
 }
+
